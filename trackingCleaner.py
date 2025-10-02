@@ -1,8 +1,8 @@
 import pyperclip, yaml_config, os, sys, time
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 from mLog import Logger, TypeOfLog
-# VERSION 1.0
-# Need mLog and yaml_config from the modular page (https://github.com/celesvivi/modular) if you want to pyinstaller this script
+# VERSION 1.1
+
 # Yes there is a lot of redundant parts but idrc, will fix it in a later date
 def get_app_directory():
     if getattr(sys, 'frozen', False):
@@ -31,7 +31,7 @@ class URL_cleaner:
                 # YouTube
                     'feature', 'kw', 'si', 'app', 'persist_app', 'noapp', 'has_verified',
                     'list', 'index', 'pp', 'source_ve_path', 'ab_channel', 'autoplay',
-
+                
                 # Others
                     'msclkid', 'cvid', 'trk', 'trkInfo', 'li_fat_id', 'lipi',
                     'utm_name', 'rdt_cid', 'share_id', 'context',
@@ -61,8 +61,8 @@ class URL_cleaner:
                 'pixiv': ['artworks']
             },
             'convertion_domains': {
-                'twitter': ['fxtwitter.com'],
-                'pixiv': ['phixiv.net']
+                'twitter': ['fxtwitter'],
+                'pixiv': ['phixiv']
             },
             'exclusion_params': {
                 'youtube': ['t']
@@ -94,6 +94,7 @@ class URL_cleaner:
         for key, values in domain_to_name.items():
             if domain in values:
                 return key
+        return None
 
 
     def is_url(self, string):
@@ -138,6 +139,8 @@ class URL_cleaner:
 
     def is_exclusion(self, url):
         domain = self.turn_into_readable_domain(self.get_domain(url))
+        if domain is None:
+            return False
         return domain in self.exclusion_params
     
     def convert_url(self, url):
@@ -161,7 +164,7 @@ class URL_cleaner:
         dirty_query = {}
 
         for param, values in query_params.items():
-            if (self.is_exclusion(url) and param in self.get_exclusion(url) 
+            if (self.is_exclusion(url) and param in self.get_exclusion(self.turn_into_readable_domain(self.get_domain(url))) 
                 or 
                 param not in self.tracking_params):
                 clean_query[param] = values
@@ -199,7 +202,6 @@ class URL_cleaner:
                 self.last_clipboard = tmp
                 self.process_clipboard(tmp)
             time.sleep(0.35)
-
 def main():
     cleaner = URL_cleaner()
     cleaner.load_config()
@@ -207,4 +209,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
