@@ -41,7 +41,7 @@ class URL_cleaner:
             ],
             'supported_domains': [
                 'facebook.com', 'fb.com', 'm.facebook.com',
-                'twitter.com', 'x.com', 'mobile.twitter.com', 'fxtwitter.com', 'vxtwitter.com'
+                'twitter.com', 'x.com', 'mobile.twitter.com', 'fxtwitter.com', 'vxtwitter.com',
                 'youtube.com', 'youtu.be', 'm.youtube.com',
                 'instagram.com', 'm.instagram.com',
                 'linkedin.com', 'm.linkedin.com',
@@ -97,11 +97,13 @@ class URL_cleaner:
 
 
     def is_url(self, string):
+        if not (isinstance(string, str)):
+            return False
         parsed = urlparse(string)
         if all([parsed.scheme in ('http', 'https'), parsed.netloc, len(string) < 200, len(string) > 5]):
-            self.log("This is an url", TypeOfLog.INFO)
+            self.log(f"This is an url {string}", TypeOfLog.INFO)
             return True
-        self.log("This is not an url", TypeOfLog.INFO)
+        self.log(f"This is not an url {string}", TypeOfLog.INFO)
         return False
     
     def is_supported_domains(self, url):
@@ -125,9 +127,8 @@ class URL_cleaner:
     def is_convert_condition(self, url):
         path = urlparse(url).path
         readable_domain = self.turn_into_readable_domain(self.get_domain(url))
-        if self.config.get_variable(f'convert_conditions.{readable_domain}') in path:
-            return True
-        return False
+        conditions = self.config.get_variable(f'convert_conditions.{readable_domain}')
+        return any(condition in path for condition in conditions)
     
     def get_converted_domain(self, readable_domain):
         return self.config.get_variable(f'convertion_domains.{readable_domain}')
@@ -179,20 +180,22 @@ class URL_cleaner:
     
     def process_clipboard(self, current): #HOLY NESTED CODE
         if self.is_url(current):
+            final_url = None
             if self.is_supported_domains(current):
                 cleaned = True
                 final_url = self.clean_url(current)
-            if self.is_convertable_url(current) and self.is_convert_condition(current):
-                if cleaned:
-                    final_url = self.convert_url(final_url)
-                else: final_url = self.convert_url(current)
+                if self.is_convertable_url(current) and self.is_convert_condition(current):
+                    if cleaned:
+                        final_url = self.convert_url(final_url)
+                    else: final_url = self.convert_url(current)
             if final_url is not None:
                 pyperclip.copy(final_url)
+                self.last_clipboard = final_url
 
     def checking_clipboard(self):
         while 1:
             tmp = pyperclip.paste()
-            if tmp is not self.last_clipboard:
+            if tmp != self.last_clipboard:
                 self.last_clipboard = tmp
                 self.process_clipboard(tmp)
             time.sleep(0.35)
@@ -202,5 +205,5 @@ def main():
     cleaner.load_config()
     cleaner.checking_clipboard()
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
