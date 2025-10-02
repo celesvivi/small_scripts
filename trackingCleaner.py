@@ -2,7 +2,7 @@ import pyperclip, yaml_config, os, sys, time
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 from mLog import Logger, TypeOfLog
 # VERSION 1.0
-
+# Need mLog and yaml_config from the modular page (https://github.com/celesvivi/modular) if you want to pyinstaller this script
 # Yes there is a lot of redundant parts but idrc, will fix it in a later date
 def get_app_directory():
     if getattr(sys, 'frozen', False):
