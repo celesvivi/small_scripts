@@ -61,8 +61,8 @@ class URL_cleaner:
                 'pixiv': ['artworks']
             },
             'convertion_domains': {
-                'twitter': ['fxtwitter'],
-                'pixiv': ['phixiv']
+                'twitter': ['fxtwitter.com'],
+                'pixiv': ['phixiv.net']
             },
             'exclusion_params': {
                 'youtube': ['t']
@@ -207,3 +207,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
